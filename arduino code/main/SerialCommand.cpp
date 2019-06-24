@@ -30,7 +30,7 @@ SerialCommand::SerialCommand(SoftwareSerial &_SoftSer)
 	usingSoftwareSerial=1; 
 	SoftSerial = &_SoftSer;
 	strncpy(delim," ",MAXDELIMETER);  
-	term='\n';  
+	term='\n';
 	numCommand=0;   
 	clearBuffer(); 
 }

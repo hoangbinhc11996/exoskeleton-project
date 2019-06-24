@@ -10,7 +10,7 @@
 #include "AccelStepper.h"
 #include "endstop.h"
 
-
+//#define DEBUG_MODE
 
 //void ctht_min_handler_debug()
 //{
@@ -42,7 +42,7 @@ class x_khop
 
   public:
     x_khop();
-    x_khop(Encoder encoder, AccelStepper stepper, endstop endstop_max, endstop endstop_min,
+    x_khop(Encoder &encoder, AccelStepper &stepper, endstop &endstop_max, endstop &endstop_min,
            long stepper_pulse_per_round, long encoder_pulse_per_round);
     x_khop(uint8_t encoder_A_pin, uint8_t encoder_B_pin,
            uint8_t stepper_step_pin, uint8_t stepper_dir_pin, uint8_t endstop_max_pin, uint8_t endstop_min_pin,
@@ -77,7 +77,7 @@ class x_khop
 
 };
 
-x_khop::x_khop(Encoder encoder, AccelStepper stepper, endstop endstop_max, endstop endstop_min,
+x_khop::x_khop(Encoder &encoder, AccelStepper &stepper, endstop &endstop_max, endstop &endstop_min,
                long stepper_pulse_per_round, long encoder_pulse_per_round) {
   _encoder = &encoder;
   _stepper = &stepper;
@@ -123,7 +123,7 @@ bool x_khop::is_min_position()
 
 bool x_khop::is_running()
 {
-  _stepper->isRunning();
+  return _stepper->isRunning();
 }
 
 
@@ -207,8 +207,15 @@ void x_khop::home()
   _stepper->setAcceleration(100000);
   _stepper->setMaxSpeed(20000);
   _stepper->moveTo(-1000000);
+  long now = millis();
   while (!_endstop_min->m_hited)
   {
+  	if(millis() - now > 10000)
+  	{
+  		break;
+  		Serial.println("homming time out!!");
+  		return;
+  	}
     this->run();
   }
   this->stop();
@@ -224,9 +231,15 @@ void x_khop::updateEndstop()
   if (_endstop_min->m_hited)
   {
     //this->stop();
+    #ifdef DEBUG_MODE
+    Serial.println("min endstop hited");
+    #endif
   }
   if (_endstop_max->m_hited)
   {
+    #ifdef DEBUG_MODE
+    Serial.println("max endstop hited");
+    #endif
     this->stop();
   }
 }
